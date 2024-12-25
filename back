@@ -1,0 +1,10 @@
+#!/bin/bash
+
+max=$1
+
+for ((i = 0; i < max; i++)); do
+  cd ../ || break  # Use '|| break' to stop if you reach the root
+done
+
+echo "$(pwd)"
+

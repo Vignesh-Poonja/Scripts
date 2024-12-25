@@ -1,0 +1,28 @@
+#!/bin/bash  
+# Internal Field Separator
+
+FILE=/etc/passwd
+
+read -p "Enter the username: " user_name
+
+info=$(grep "^$user_name:" $FILE)
+
+old_IFS=$IFS
+IFS=":"
+
+if [ -n "$info" ]; then
+    read user pw uid gid full home shell <<< "$info"
+    
+    echo "User  is: $user"
+    echo "Pass  is: $pw"
+    echo "UID   is: $uid"
+    echo "GID   is: $gid"
+    echo "Name  is: $full"
+    echo "Home  is: $home"
+    echo "Shell is: $shell"
+else
+    echo "User not found >_<"
+fi
+
+IFS=$old_IFS
+

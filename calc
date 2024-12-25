@@ -1,0 +1,17 @@
+#! /bin/bash
+
+echo "****** Calculator Script ******"
+
+if [ "$1" == "-p" ]; then
+    precision=$2
+    shift 2
+else
+    precision=3
+fi
+
+#echo "all variable: $@"
+
+bc << _EOF_             #starting from here 'bc' will be applied to the end of the File
+scale=$precision
+$@
+_EOF_

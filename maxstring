@@ -1,0 +1,35 @@
+#!/bin/bash
+
+echo " ****** MAX STRING Script ****** "
+read -p "Enter the file name: " file_name  # Corrected the read command
+
+# Check if file exists
+if [ ! -f "$file_name" ]; then
+    echo "Error: File not found!"
+    exit 1
+fi
+
+s=$(strings "$file_name")
+
+ref_word=''
+max_len=0
+counter=1  # Initialize counter for line numbers
+
+for i in $s; do
+    len=$(echo -n "$i" | wc -c)  # -n to avoid counting newline
+    len=$((len))  # No need to subtract, wc -c handles it correctly
+
+    echo "$counter. $i ---> $len"
+
+    if [ "$len" -gt "$max_len" ]; then
+        ref_word="$i" 
+        max_len="$len"
+    fi
+
+    ((counter++))  # Increment counter
+done
+
+echo "---------------------------------"
+echo " Max length is $max_len "
+echo " Longest word is $ref_word "
+echo "---------------------------------"
