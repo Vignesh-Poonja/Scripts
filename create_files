@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Check if the user provided an argument for the number of files
+if [ -z "$1" ]; then
+  echo "Usage: $0 <number_of_files>"
+  exit 1
+fi
+
+# Number of files to create
+num_files=$1
+directory="xyz"
+
+# Create the directory if it doesn't exist
+if [ ! -d "$directory" ]; then
+  mkdir "$directory"
+  echo "Directory '$directory' created."
+fi
+
+# Loop to create files
+for ((i=1; i<=num_files; i++)); do
+  touch "$directory/file_$i.txt"
+  echo "Created file_$i.txt"
+done
+
+echo "$num_files files created in '$directory'."
+
