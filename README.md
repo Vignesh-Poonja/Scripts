@@ -33,5 +33,5 @@ Server Health Status: Healthy
 CPU Usage: 25%
 Memory Usage: 45%
 Free Swap Space: 3GB
-
-![alt text](image.png)
+```
+![image](https://github.com/user-attachments/assets/10c1db17-ee38-4352-a179-0a6ec773f03c)
