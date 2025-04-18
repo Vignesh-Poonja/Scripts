@@ -23,7 +23,7 @@ This Bash script performs a basic health check on a Linux server by evaluating C
 ## 🖥️ Example Output
 
 ```bash
-$ ./health_check.sh
+$ ./server_health.sh explain
 
 Sat Apr 19 12:30:00 UTC 2025
 Hostname: my-server
