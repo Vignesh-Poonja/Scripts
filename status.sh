@@ -11,7 +11,6 @@ declare -A PRIMARY_DBS=(
     ["dsaadm"]="70"
 )
 
-# Define secondary databases as an associative array
 declare -A SECONDARY_DBS=(
     ["dspadm"]="93"
 )
@@ -20,33 +19,25 @@ declare -A SECONDARY_DBS=(
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW_BOLD='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Function to check the status of a HANA database
 check_hana_status() {
     local username=$1
     local instance=$2
-    local role=$3
 
     # Get the full process list
-    local process_list=$(sudo su - $username -c "sapcontrol -nr $instance -function GetProcessList")
+    local process_list
+    process_list=$(sudo su - $username -c "sapcontrol -nr $instance -function GetProcessList")
 
     # Extract the first three characters of the username
     local short_username=${username:0:3}
 
-    # Determine display name with formatting
-    local display_name="$short_username"
-    if [[ "$role" == "secondary" && "$short_username" == "dsp" ]]; then
-        display_name="${YELLOW_BOLD}${short_username}${NC}"
-    fi
-
     # Check if any process is not GREEN, Running
     if echo "$process_list" | grep -qvE 'GREEN, Running'; then
-        # Mark as stopped (red)
-        printf "%-15s ${RED}Stopped${NC}\n" "$display_name"
+        echo "$short_username" >> stopped.txt
     else
-        # Mark as running (green)
-        printf "%-15s ${GREEN}Running${NC}\n" "$display_name"
+        echo "$short_username" >> running.txt
     fi
 }
 
@@ -59,19 +50,43 @@ echo -e "Status:\n"
 printf "%-15s %-10s\n" "Database" "Status"
 printf "%-15s %-10s\n" "--------" "--------"
 
+# Remove temp files if they exist
+rm -f running.txt stopped.txt
+
 # Check the status of primary databases
 for username in "${!PRIMARY_DBS[@]}"; do
     instance=${PRIMARY_DBS[$username]}
-    check_hana_status "$username" "$instance" "primary"
-done | sort
-
-# Add a line gap before secondary databases
-echo ""
+    check_hana_status $username $instance
+done
 
 # Check the status of secondary databases
 for username in "${!SECONDARY_DBS[@]}"; do
     instance=${SECONDARY_DBS[$username]}
-    check_hana_status "$username" "$instance" "secondary"
-done | sort
+    check_hana_status $username $instance
+done
+
+# Display running databases
+if [[ -f running.txt ]]; then
+    while read -r db; do
+        if [[ "$db" == "dsp" ]]; then
+            printf "%-15b ${GREEN}Running${NC}\n" "${YELLOW_BOLD}${db}${NC}"
+        else
+            printf "%-15s ${GREEN}Running${NC}\n" "$db"
+        fi
+    done < <(sort running.txt)
+    rm running.txt
+fi
+
+# Display stopped databases
+if [[ -f stopped.txt ]]; then
+    while read -r db; do
+        if [[ "$db" == "dsp" ]]; then
+            printf "%-15b ${RED}Stopped${NC}\n" "${YELLOW_BOLD}${db}${NC}"
+        else
+            printf "%-15s ${RED}Stopped${NC}\n" "$db"
+        fi
+    done < <(sort stopped.txt)
+    rm stopped.txt
+fi
 
 echo ""
