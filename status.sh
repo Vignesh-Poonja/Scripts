@@ -1,51 +1,81 @@
-cgvk62@uvuhanottdb:~> ./status.sh
+#!/bin/bash
 
-Sun Apr 20 01:22:21 PM CEST 2025
-uvuhanottdb
+# Define primary and secondary databases
+declare -A PRIMARY_DBS=(
+    ["uutadm"]="50"
+    ["srtadm"]="51"
+    ["uftadm"]="44"
+    ["cstadm"]="40"
+    ["ottadm"]="55"
+    ["dstadm"]="60"
+    ["dsaadm"]="70"
+)
 
-Status:
+declare -A SECONDARY_DBS=(
+    ["dspadm"]="93"
+)
 
-Running        Stopped
---------       --------
+# ANSI color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW_BOLD='\033[1;33m'
+NC='\033[0m'
 
-cst
-ott
-uft
-dst
-dsa
-uut
-srt
-dsp
-cgvk62@uvuhanottdb:~> ./status.sh
+# Clear temp files
+> running.txt
+> stopped.txt
 
-Sun Apr 20 01:24:34 PM CEST 2025
-uvuhanottdb
+# Check database status
+check_hana_status() {
+    local username=$1
+    local instance=$2
+    local short_username=${username:0:3}
 
-Status:
+    local process_list
+    process_list=$(sudo su - "$username" -c "sapcontrol -nr $instance -function GetProcessList")
 
-Database        Status
---------        --------
-cst             Stopped
-dsa             Stopped
-dsp  Stopped
-dst             Stopped
-ott             Stopped
-srt             Stopped
-uft             Stopped
-uut             Stopped
+    if echo "$process_list" | grep -qvE 'GREEN, Running'; then
+        echo "$short_username" >> stopped.txt
+    else
+        echo "$short_username" >> running.txt
+    fi
+}
 
-cgvk62@uvuhanottdb:~> sudo su - uutadm
-uutadm@uvuhanottdb:/usr/sap/UUT/HDB50> sapcontrol -nr 50 -function GetProcessList
+# Header
+echo ""
+echo "$(date)"
+echo "$(hostname)"
+echo ""
+echo "Status:"
+echo ""
+printf "%-18s%s\n" "Running" "Stopped"
+printf "%-18s%s\n" "--------" "--------"
 
-20.04.2025 13:25:42
-GetProcessList
-OK
-name, description, dispstatus, textstatus, starttime, elapsedtime, pid
-hdbdaemon, HDB Daemon, GREEN, Running, 2025 04 04 08:00:27, 389:25:15, 57382
-hdbcompileserver, HDB Compileserver, GREEN, Running, 2025 04 04 08:00:35, 389:25:07, 57699
-hdbindexserver, HDB Indexserver-UUT, GREEN, Running, 2025 04 04 08:00:36, 389:25:06, 57753
-hdbnameserver, HDB Nameserver, GREEN, Running, 2025 04 04 08:00:27, 389:25:15, 57407
-hdbpreprocessor, HDB Preprocessor, GREEN, Running, 2025 04 04 08:00:35, 389:25:07, 57702
-hdbwebdispatcher, HDB Web Dispatcher, GREEN, Running, 2025 04 04 08:01:08, 389:24:34, 59630
-hdbxsengine, HDB XSEngine-UUT, GREEN, Running, 2025 04 04 08:00:36, 389:25:06, 57756
-uutadm@uvuhanottdb:/usr/sap/UUT/HDB50>
+# Check primary DBs
+for username in "${!PRIMARY_DBS[@]}"; do
+    check_hana_status "$username" "${PRIMARY_DBS[$username]}"
+done
+
+# Check secondary DBs
+for username in "${!SECONDARY_DBS[@]}"; do
+    check_hana_status "$username" "${SECONDARY_DBS[$username]}"
+done
+
+# Sort and paste output side by side with colors
+paste <(
+    sort running.txt | while read -r db; do
+        echo -e "${GREEN}${db}${NC}"
+    done
+) <(
+    sort stopped.txt | while read -r db; do
+        if [[ "$db" == "dsp" ]]; then
+            echo -e "${YELLOW_BOLD}${db}${NC}"
+        else
+            echo -e "${RED}${db}${NC}"
+        fi
+    done
+)
+
+# Cleanup
+rm -f running.txt stopped.txt
+echo ""
