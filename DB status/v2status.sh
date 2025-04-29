@@ -1,10 +1,18 @@
 #!/bin/bash
 
-# Define the primary databases
+# Define the primary and secondary databases
 declare -A PRIMARY_DBS=(
-    ["ufpadm"]="64"
-    ["cspadm"]="95"
-    ["otpadm"]="85"
+    ["uutadm"]="50"
+    ["srtadm"]="51"
+    ["uftadm"]="44"
+    ["cstadm"]="40"
+    ["ottadm"]="55"
+    ["dstadm"]="60"
+    ["dsaadm"]="70"
+)
+
+# Define secondary databases as an associative array
+declare -A SECONDARY_DBS=(
     ["dspadm"]="93"
 )
 
@@ -28,7 +36,7 @@ check_hana_status() {
     # Check if any process is not GREEN, Running
     if echo "$process_list" | grep -qE 'GRAY|YELLOW'; then
         # If any process is GRAY or YELLOW, mark the database as stopped
-        echo -e "$short_username${RESET}" >> stopped.txt
+        echo -e "${RED}$short_username${RESET}" >> stopped.txt
     else
         # All processes are GREEN, Running
         echo -e "$short_username${RESET}"
@@ -49,6 +57,16 @@ echo -e "--------       --------"
 for username in "${!PRIMARY_DBS[@]}"; do
     instance=${PRIMARY_DBS[$username]}
     check_hana_status $username $instance
+done | sort
+
+# Add a line gap before secondary databases
+echo ""
+
+# Check the status of secondary databases
+for username in "${!SECONDARY_DBS[@]}"; do
+    instance=${SECONDARY_DBS[$username]}
+    # Print secondary databases in bold yellow
+    echo -e "${BOLD_YELLOW}$(check_hana_status $username $instance)${RESET}"
 done | sort
 
 # Print stopped databases
