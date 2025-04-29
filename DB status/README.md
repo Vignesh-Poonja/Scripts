@@ -53,7 +53,8 @@ uut
 
 dsp        
 ```
-![image](https://github.com/user-attachments/assets/b53910dc-8d8f-4689-9779-62e8df2ddbaf)
+![image](https://github.com/user-attachments/assets/2588e441-976c-436c-a302-6fb076da3750)
+
 
 
 ## Configuration
