@@ -50,8 +50,8 @@ echo "$(hostname)"
 echo ""
 echo -e "Status:"
 echo ""
-echo -e "${GREEN}Running${RESET}        ${RED}Stopped${RESET}"
-echo -e "--------       --------"
+echo -e "${GREEN}Running${RESET}"
+echo -e "--------"
 
 # Check the status of primary databases
 for username in "${!PRIMARY_DBS[@]}"; do
@@ -72,7 +72,11 @@ done | sort
 # Print stopped databases
 if [[ -f stopped.txt ]]; then
     echo ""
-    cat stopped.txt
+    echo -e "${RED}Stopped:${RESET}"
+echo -e "--------"
+cat stopped.txt | while read line; do
+echo -e "\t${RED}$line${RESET}"
+done
     rm stopped.txt
 fi
 echo ""
