@@ -42,18 +42,20 @@ uvuhanottdb
 
 Status:
 
-Running         Stopped
---------        --------
+Running
+--------
 cst
 ott
 srt
 uft
 uut
 
-
-dsp        
+Stopped
+--------
+        dsp        
 ```
-![image](https://github.com/user-attachments/assets/2588e441-976c-436c-a302-6fb076da3750)
+![image](https://github.com/user-attachments/assets/0d020dac-328f-400b-a752-7df22b6e5973)
+
 
 
 
