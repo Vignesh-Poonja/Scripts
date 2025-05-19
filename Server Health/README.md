@@ -35,3 +35,5 @@ Memory Usage: 45%
 Free Swap Space: 3GB
 ```
 ![image](https://github.com/user-attachments/assets/10c1db17-ee38-4352-a179-0a6ec773f03c)
+![image](https://github.com/user-attachments/assets/dd540090-b29e-4f2a-8e9f-63a323a7d76b)
+
