@@ -112,6 +112,15 @@ start_hana() {
     done
 }
 
+# Check if HANA is running
+is_running() {
+  local status
+  status=$(sudo su - "$DB_USER" -c "sapcontrol -nr $DB_INSTANCE -function GetProcessList" 2>/dev/null)
+  local total=$(echo "$status" | awk -F, 'NR>4 && $3 ~ /[A-Z]+/ && $4 ~ /[A-Za-z]+/ {count++} END {print count+0}')
+  local green_running=$(echo "$status" | awk -F, 'NR>4 && $3 ~ /GREEN/ && $4 ~ /Running/ {count++} END {print count+0}')
+  [ "$total" -ne 0 ] && [ "$total" -eq "$green_running" ]
+}
+
 # Main script
 if [ $# -ne 1 ]; then
     echo "Usage: $0 {start|stop|status}"
